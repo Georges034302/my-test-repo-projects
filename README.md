@@ -3,4 +3,4 @@
 * Update README everytime a feature is added
 * Every team member is responsible for updating README
 * Team home page added
-* Tracker added
+* Tracker 2 added by team leader
