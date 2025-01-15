@@ -8,23 +8,39 @@ jobs:
   move-issue-to-done:
     runs-on: ubuntu-latest
     steps:
-      # Checkout repository
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3 # Use v3 for better compatibility
 
-      # Check if the PR is merged (for automatic moving of the issue)
       - name: Check if PR is merged
         if: github.event.pull_request.merged == true
         run: |
           echo "Pull Request merged, moving associated issue to DONE."
+
+          # Get the issue number from the PR
+          ISSUE_NUMBER=$(echo "${{ github.event.pull_request.body }}" | grep -oE '#[0-9]+' | tr -d '#')
+          if [[ -z "$ISSUE_NUMBER" ]]; then
+            echo "No issue number found in the PR body. Skipping project update."
+            exit 0 # Exit gracefully
+          fi
+          echo "Issue Number: $ISSUE_NUMBER"
+
+          # Get the issue ID using the GitHub API
+          ISSUE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER" | jq -r '.id')
+          if [[ -z "$ISSUE_ID" ]]; then
+            echo "Could not find issue with number $ISSUE_NUMBER. Skipping project update."
+            exit 1
+          fi
+          echo "Issue ID: $ISSUE_ID"
 
           # Move the associated issue to the "Done" column in the project
           curl -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             -d '{
-              "column_id": "5",
+              "column_id": "YOUR_PROJECT_COLUMN_ID", # Replace with your actual column ID
               "content_type": "Issue",
-              "content_id": ${{ github.event.issue.id }} # Corrected syntax
+              "content_id": '"$ISSUE_ID"' # Use variable and proper quoting
             }' \
-            https://api.github.com/projects/columns/5/cards
+            "https://api.github.com/projects/columns/YOUR_PROJECT_COLUMN_ID/cards"
