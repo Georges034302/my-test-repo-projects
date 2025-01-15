@@ -4,4 +4,4 @@
 * Every team member is responsible for updating README
 * Team home page added
 * Tracker 2 added by team leader
-* New feature added
+* New feature addedIssue #17 - enhancement - Closed - @Georges034302
