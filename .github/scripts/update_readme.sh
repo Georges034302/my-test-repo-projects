@@ -13,13 +13,19 @@ fi
 while IFS= read -r ISSUE_NUMBER; do
   echo "Processing Issue Number: $ISSUE_NUMBER"
 
+  # Get the access token from the secret
+  GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
   # Get Issue Labels (using jq for reliability)
-  ISSUE_LABELS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+  ISSUE_LABELS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER" 2>/dev/null | jq -r '.labels[].name' | paste -sd "," || echo "No Labels")
 
+  # Get the username of the actor
+  ACTOR_USERNAME=${{ github.actor }}
+
   # Create the log entry (single line) - Improved formatting
-  LOG_ENTRY="Issue #$ISSUE_NUMBER - ${ISSUE_LABELS} - Closed - @${{ github.actor }}"
+  LOG_ENTRY="Issue #$ISSUE_NUMBER - ${ISSUE_LABELS} - Closed - @$ACTOR_USERNAME"
 
   # Use sed to append the line to the README.md
   sed -i "\$a$LOG_ENTRY" README.md
