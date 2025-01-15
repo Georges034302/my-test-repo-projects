@@ -11,14 +11,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Check if PR is merged
+      - name: Update README (Conditional)
         if: github.event.pull_request.merged == true
-        run: echo "Pull Request merged, updating README."
-
-      - name: Update README
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Set the token as an env variable.
-          ACTOR_USERNAME: ${{ github.actor }} # Set the actor username as an env variable.
-          GITHUB_REPOSITORY: ${{ github.repository }} # Set the repository as an env variable.
-        run: ./.github/scripts/update_readme.sh
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR_USERNAME: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          echo "Pull Request merged, updating README."
+          ./.github/scripts/update_readme.sh
