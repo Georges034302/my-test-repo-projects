@@ -1,46 +1,51 @@
-name: GitHub Projects Automation
+name: GitHub Projects Automation with README Update
 
 on:
   pull_request:
     types: [closed]
 
 jobs:
-  move-issue-to-done:
+  move-issue-to-done-and-update-readme:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3 # Use v3 for better compatibility
+        uses: actions/checkout@v3
 
       - name: Check if PR is merged
         if: github.event.pull_request.merged == true
         run: |
-          echo "Pull Request merged, moving associated issue to DONE."
+          echo "Pull Request merged, updating README."
 
-          # Get the issue number from the PR
-          ISSUE_NUMBER=$(echo "${{ github.event.pull_request.body }}" | grep -oE '#[0-9]+' | tr -d '#')
-          if [[ -z "$ISSUE_NUMBER" ]]; then
-            echo "No issue number found in the PR body. Skipping project update."
-            exit 0 # Exit gracefully
+          # Get the issue numbers from the PR body (handles multiple issues)
+          ISSUE_NUMBERS=$(echo "${{ github.event.pull_request.body }}" | grep -oE '#[0-9]+' | tr -d '#' | xargs -n1)
+
+          if [[ -z "$ISSUE_NUMBERS" ]]; then
+            echo "No issue numbers found in the PR body. Skipping README update."
+            exit 0
           fi
-          echo "Issue Number: $ISSUE_NUMBER"
 
-          # Get the issue ID using the GitHub API
-          ISSUE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER" | jq -r '.id')
-          if [[ -z "$ISSUE_ID" ]]; then
-            echo "Could not find issue with number $ISSUE_NUMBER. Skipping project update."
-            exit 1
-          fi
-          echo "Issue ID: $ISSUE_ID"
+          while IFS= read -r ISSUE_NUMBER; do
+            echo "Processing Issue Number: $ISSUE_NUMBER"
 
-          # Move the associated issue to the "Done" column in the project
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d '{
-              "column_id": "YOUR_PROJECT_COLUMN_ID", # Replace with your actual column ID
-              "content_type": "Issue",
-              "content_id": '"$ISSUE_ID"' # Use variable and proper quoting
-            }' \
-            "https://api.github.com/projects/columns/YOUR_PROJECT_COLUMN_ID/cards"
+            # Get Issue Labels (using jq for reliability)
+            ISSUE_LABELS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER" | jq -r '.labels[].name' | paste -sd ",")
+            if [[ -z "$ISSUE_LABELS" ]]; then
+              ISSUE_LABELS="No Labels"
+            fi
+
+            # Create the log entry (single line)
+            LOG_ENTRY="Issue #$ISSUE_NUMBER - $ISSUE_LABELS - Closed - @${{ github.actor }}"
+
+            # Use sed to append the line to the README.md
+            sed -i "\$a$LOG_ENTRY" README.md
+
+          done <<< "$ISSUE_NUMBERS"
+
+          # Commit the changes to the README
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add README.md
+          git commit -m "Update issue status log in README"
+          git push
