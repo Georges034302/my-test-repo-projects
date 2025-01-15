@@ -4,3 +4,4 @@
 * Every team member is responsible for updating README
 * Team home page added
 * Tracker 2 added by team leader
+* New feature added
