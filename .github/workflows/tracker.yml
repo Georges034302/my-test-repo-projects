@@ -14,5 +14,11 @@ jobs:
       - name: Check if PR is merged
         if: github.event.pull_request.merged == true
         run: |
-          chmod u+x .github/scripts/update_readme.sh
-          ./.github/scripts/update_readme.sh
+          echo "Pull Request merged, updating README."
+
+      - name: Update README
+        env: # Set an environment variable
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: ./.github/scripts/update_readme.sh
+
+      
