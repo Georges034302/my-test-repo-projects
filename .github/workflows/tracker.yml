@@ -1,0 +1,30 @@
+name: GitHub Projects Automation
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  move-issue-to-done:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Check if the PR is merged (for automatic moving of the issue)
+      - name: Check if PR is merged
+        if: github.event.pull_request.merged == true
+        run: |
+          echo "Pull Request merged, moving associated issue to DONE."
+
+          # Move the associated issue to the "Done" column in the project
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d '{
+              "column_id": "5",
+              "content_type": "Issue",
+              "content_id": ${{ github.event.issue.id }} # Corrected syntax
+            }' \
+            https://api.github.com/projects/columns/5/cards
