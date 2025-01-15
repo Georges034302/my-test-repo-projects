@@ -5,3 +5,4 @@
 * Team home page added
 * Tracker 2 added by team leader
 * New feature addedIssue #17 - enhancement - Closed - @Georges034302
+Issue #19 - enhancement - Closed - @Georges034302
