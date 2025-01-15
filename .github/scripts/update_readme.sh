@@ -18,7 +18,7 @@ while IFS= read -r ISSUE_NUMBER; do
   LOG_ENTRY="Issue #$ISSUE_NUMBER - ${ISSUE_LABELS} - Closed - @$ACTOR_USERNAME"
 
   # Append to README
-  printf "%s\n" "$LOG_ENTRY" >> README.md
+  printf "\n%s\n" "$LOG_ENTRY" >> README.md
 done <<< "$ISSUE_NUMBERS"
 
 # Commit and push changes (no error checking on commit/push)
