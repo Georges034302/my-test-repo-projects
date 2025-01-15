@@ -16,10 +16,3 @@ jobs:
         run: |
           chmod u+x .github/scripts/update_readme.sh
           ./.github/scripts/update_readme.sh
-
-          # Commit the changes to the README
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git add README.md
-          git commit -m "Update issue status log in README"
-          git push
