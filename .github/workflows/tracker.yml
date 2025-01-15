@@ -5,7 +5,7 @@ on:
     types: [closed]
 
 jobs:
-  move-issue-to-done-and-update-readme:
+  update-readme:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -13,12 +13,12 @@ jobs:
 
       - name: Check if PR is merged
         if: github.event.pull_request.merged == true
-        run: |
-          echo "Pull Request merged, updating README."
+        run: echo "Pull Request merged, updating README."
 
       - name: Update README
-        env: # Set an environment variable
+        env:
           PR_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Set the token as an env variable.
+          ACTOR_USERNAME: ${{ github.actor }} # Set the actor username as an env variable.
+          GITHUB_REPOSITORY: ${{ github.repository }} # Set the repository as an env variable.
         run: ./.github/scripts/update_readme.sh
-
-      
