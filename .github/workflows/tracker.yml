@@ -1,0 +1,23 @@
+name: GitHub Projects Automation with README Update
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Update README (Conditional)
+        if: github.event.pull_request.merged == true
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR_USERNAME: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          echo "Pull Request merged, updating README."
+          ./.github/scripts/update_readme.sh
