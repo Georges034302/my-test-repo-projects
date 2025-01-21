@@ -4,7 +4,7 @@
 * Update README everytime a feature is added
 * Every team member is responsible for updating README
 * Team home page added
-* Teasting Tracker and Update README script
+
 
 
 
