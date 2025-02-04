@@ -13,3 +13,5 @@
 
 
 Issue #26 - enhancement - Closed - @Georges034302
+
+Issue #28 - bug - Closed - @Georges034302
