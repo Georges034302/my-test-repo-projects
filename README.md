@@ -5,6 +5,7 @@
 * Every team member is responsible for updating README
 * Team home page added
 * Test Tracker and Update README
+* Testing Python app
 
 
 
